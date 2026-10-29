@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="StackLab - a beginner-friendly visualizer for the Stack (LIFO) data structure, built with plain HTML, CSS and JavaScript."
+    />
+    <title>StackLab · Stack Data Structure Visualizer</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="brand">
+        <span class="logo" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </span>
+        <div class="brand-text">
+          <h1>StackLab</h1>
+          <p>Stack Data Structure Visualizer</p>
+        </div>
+      </div>
+
+      <ul class="chips">
+        <li>LIFO</li>
+        <li>Capacity <span id="chipCap">8</span></li>
+        <li>Push · Pop · Peek = O(1)</li>
+      </ul>
+    </header>
+
+    <main class="layout">
+      <!-- ============ Controls ============ -->
+      <section class="panel controls" aria-labelledby="controlsTitle">
+        <h2 id="controlsTitle" class="panel-title">Controls</h2>
+
+        <div class="field">
+          <label for="sizeInput">Stack size — you decide</label>
+          <div class="size-row">
+            <input
+              id="sizeInput"
+              class="input"
+              type="number"
+              min="1"
+              step="1"
+              value="8"
+              autocomplete="off"
+            />
+            <button id="setSizeBtn" class="btn" type="button">Set size</button>
+          </div>
+          <span class="hint">Any whole number from 1 upwards — no upper limit.</span>
+        </div>
+
+        <div class="field field--value" id="valueField" hidden>
+          <label for="valueInput">Character to push — one at a time</label>
+          <div class="size-row">
+            <input
+              id="valueInput"
+              class="input"
+              type="text"
+              maxlength="1"
+              placeholder="1 · A · #"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+            />
+            <button id="pushBtn" class="btn btn--primary" type="button">Push</button>
+          </div>
+          <span class="hint">
+            One character per push — a digit, a letter or a symbol. Its ASCII
+            code picks the block's size: “0” is the smallest, “9” clearly bigger,
+            “A” bigger again, “a” near the top.
+          </span>
+        </div>
+
+        <div class="btn-row btn-row--two">
+          <button id="popBtn" class="btn" type="button">Pop</button>
+          <button id="peekBtn" class="btn" type="button">Peek</button>
+        </div>
+
+        <div class="btn-row btn-row--auto">
+          <button id="autoPushBtn" class="btn" type="button">▶ Auto Push</button>
+          <button id="autoPopBtn" class="btn" type="button">▶ Auto Pop</button>
+        </div>
+        <span class="hint hint--auto">
+          Auto Push repeats the character in the box (or climbs 0, 1, 2 … 9 when
+          it is empty) until overflow · Auto Pop empties until underflow · click
+          Stop to pause it.
+        </span>
+
+        <p id="message" class="message message--ok" role="status" aria-live="polite">
+          Ready — set a stack size first, then type a value to push.
+        </p>
+
+        <div class="size-block">
+          <div class="size-head">
+            <span>Stack size</span>
+            <strong id="sizeValue">0 / 8</strong>
+          </div>
+          <div class="meter" id="meter">
+            <span id="meterFill"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Stack view ============ -->
+      <section class="panel stage" aria-labelledby="stageTitle">
+        <div class="stage-head">
+          <h2 id="stageTitle" class="panel-title">Stack view</h2>
+          <span class="tag">Capacity · <span id="tagCap">8</span></span>
+        </div>
+
+        <div class="stack-wrap">
+          <!-- the ladder the little climber walks up and down -->
+          <div class="ladder" aria-hidden="true">
+            <div class="climber" id="climber">
+              <span class="climber__carry" id="climberCarry"></span>
+              <svg class="climber__fig" viewBox="0 0 34 34" width="34" height="34">
+                <path d="M9 15 L3.5 9.5M25 15 L30.5 9.5M14.5 23.5 L12.5 30M19.5 23.5 L21.5 30"
+                      stroke="#22d3ee" stroke-width="2.6" stroke-linecap="round" fill="none" />
+                <circle cx="17" cy="15" r="8.6" fill="#22d3ee" stroke="#062a33" stroke-width="1.6" />
+                <circle cx="14.2" cy="13.4" r="1.5" fill="#062a33" />
+                <circle cx="19.8" cy="13.4" r="1.5" fill="#062a33" />
+                <path d="M13.6 17.4 Q17 20.6 20.4 17.4" stroke="#062a33" stroke-width="1.6"
+                      stroke-linecap="round" fill="none" />
+              </svg>
+            </div>
+          </div>
+
+          <ol id="stack" class="stack" aria-label="Stack elements, bottom to top"></ol>
+        </div>
+
+        <p class="stage-foot">
+          <span class="arrow arrow--up">▲</span> <strong>TOP</strong> = last element
+          pushed &nbsp;·&nbsp; <span class="arrow arrow--down">▼</span>
+          <strong>BOTTOM</strong> = first element pushed (index 0)
+        </p>
+        <p class="stage-foot stage-foot--climb">
+          🧗 Watch the little climber carry each value up the ladder on
+          <strong>Push</strong>, take it back down on <strong>Pop</strong>, and climb up
+          only to read it on <strong>Peek</strong> — and watch the
+          <strong>C program</strong> below light up line by line while it happens.
+        </p>
+      </section>
+
+      <!-- ============ History ============ -->
+      <section class="panel history-panel" aria-labelledby="historyTitle">
+        <h2 id="historyTitle" class="panel-title">Operation history</h2>
+        <ul id="history" class="history"></ul>
+        <p id="historyEmpty" class="empty-note">No operations yet — try Push.</p>
+      </section>
+
+      <!-- ============ C program ============ -->
+      <section class="panel code-panel" aria-labelledby="codeTitle">
+        <div class="stage-head">
+          <h2 id="codeTitle" class="panel-title">C program — the stack itself</h2>
+          <span class="tag">the executing line lights up live</span>
+        </div>
+
+        <pre class="code" id="code" aria-label="C source code of the stack"><code><span class="cl">#include &lt;stdio.h&gt;</span>
+<span class="cl">#include &lt;stdlib.h&gt;</span>
+<span class="cl"> </span>
+<span class="cl">int *stack;      /* the elements           */</span>
+<span class="cl">int top  = -1;   /* index of the TOP       */</span>
+<span class="cl">int size;        /* capacity — you decide  */</span>
+<span class="cl"> </span>
+<span class="cl">void createStack(int n)</span>
+<span class="cl">{</span>
+<span class="cl" data-k="size">    size  = <span id="codeSize">8</span>;                    /* set from the page */</span>
+<span class="cl">    stack = (int *)malloc(size * sizeof(int));</span>
+<span class="cl">    top   = -1;</span>
+<span class="cl">}</span>
+<span class="cl"> </span>
+<span class="cl">int isEmpty(void) { return top == -1; }</span>
+<span class="cl">int isFull(void)  { return top == size - 1; }</span>
+<span class="cl"> </span>
+<span class="cl">void push(int value)</span>
+<span class="cl">{</span>
+<span class="cl" data-k="isfull">    if (isFull()) {                  /* O(1) check */</span>
+<span class="cl" data-k="overflow">        printf("Stack overflow\n");</span>
+<span class="cl">        return;</span>
+<span class="cl">    }</span>
+<span class="cl" data-k="pushline">    stack[++top] = value;            /* O(1) — no shifting */</span>
+<span class="cl">}</span>
+<span class="cl"> </span>
+<span class="cl">int pop(void)</span>
+<span class="cl">{</span>
+<span class="cl" data-k="isempty-pop">    if (isEmpty()) {</span>
+<span class="cl" data-k="underflow-pop">        printf("Stack underflow\n");</span>
+<span class="cl">        return -1;</span>
+<span class="cl">    }</span>
+<span class="cl" data-k="popline">    return stack[top--];             /* O(1) — only the top */</span>
+<span class="cl">}</span>
+<span class="cl"> </span>
+<span class="cl">int peek(void)</span>
+<span class="cl">{</span>
+<span class="cl" data-k="isempty-peek">    if (isEmpty()) {</span>
+<span class="cl" data-k="underflow-peek">        printf("Stack underflow\n");</span>
+<span class="cl">        return -1;</span>
+<span class="cl">    }</span>
+<span class="cl" data-k="peekline">    return stack[top];               /* O(1) — one known spot */</span>
+<span class="cl">}</span></code></pre>
+
+        <p class="stage-foot">
+          <strong>LIFO</strong> — the element pushed <em>last</em> is popped
+          <em>first</em>. Push, Pop and Peek are all <strong>O(1)</strong>: they only
+          ever touch the top index. <strong>Overflow</strong> = push on a full stack ·
+          <strong>Underflow</strong> = pop / peek on an empty one.
+        </p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>StackLab · built with plain HTML, CSS and JavaScript — no frameworks, no backend.</p>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
